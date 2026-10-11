@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Light Chaser & Claw Challenge</title>
+
+<style>
+* { box-sizing: border-box; }
+
+:root {
+    --purple: #7c3aed;
+    --pink: #ec4899;
+    --yellow: #f59e0b;
+    --cyan: #06b6d4;
+    --green: #10b981;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    padding: 10px;
+    font-family: 'Comic Sans MS', 'Bubblegum Sans', Arial, Helvetica, sans-serif;
+    color: #1f2937;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(255,182,193,0.4), rgba(135,206,250,0.4)),
+        url("https://tse1.mm.bing.net/th/id/OIP.KBI-ob1atP4pUmy3lQSksAHaE7?r=0&rs=1&pid=ImgDetMain&o=7&rm=3")
+        center / cover fixed no-repeat;
+}
+
+/* SLIDE CONTAINER STYLES */
+.slide {
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.slide.active {
+    display: flex;
+}
+
+/* SLIDE 1: TITLE SCREEN STYLES */
+.title-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 1300px;
+    gap: 35px;
+}
+
+/* BIG PURPLE BOX */
+.title-card {
+    background: linear-gradient(145deg, #7c3aed, #4c1d95);
+    border: 10px solid #3b0764;
+    border-radius: 48px;
+    padding: 65px 40px;
+    box-shadow: 0 18px 0 #2e1065, 0 30px 45px rgba(0,0,0,0.4);
+    position: relative;
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.title-lights {
+    position: absolute;
+    top: -22px;
+    left: 50px;
+    right: 50px;
+    display: flex;
+    justify-content: space-around;
+    pointer-events: none;
+}
+
+.title-lights .bulb {
+    width: 16px;
+    height: 16px;
+}
+
+.main-title {
+    font-size: clamp(24px, 3.8vw, 54px);
+    font-weight: 900;
+    color: #fde047;
+    margin: 0;
+    text-shadow: 
+        4px 4px 0px #be123c,
+        8px 8px 0px #3b0764,
+        0 0 30px rgba(253, 224, 71, 0.9);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+
+/* BUTTONS OUTSIDE THE PURPLE BOX */
+.button-group {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.title-btn {
+    padding: 18px 42px;
+    font-size: clamp(20px, 2.8vw, 28px);
+    font-weight: 900;
+    border: 0;
+    border-radius: 24px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-how {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 8px #b45309, 0 12px 25px rgba(245,158,11,0.4);
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 8px #047857, 0 12px 25px rgba(16,185,129,0.4);
+}
+
+.title-btn:hover {
+    transform: translateY(-3px);
+}
+
+.title-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px currentColor;
+}
+
+/* FOOTER STYLES */
+.footer-credits {
+    text-align: center;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 10px 30px;
+    border-radius: 20px;
+    border: 3px solid #7c3aed;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.footer-heading {
+    font-size: 20px;
+    font-weight: 900;
+    color: #1f2937;
+    margin-bottom: 2px;
+}
+
+.footer-names {
+    font-size: 14px;
+    font-weight: 900;
+    color: #6d28d9;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* SLIDE 2: GAME LAYOUT */
+.game {
+    max-width: 1500px;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 14px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    padding: 2px 0;
+}
+
+/* WORD PANEL WITH BLINKING LIGHTS MARQUEE */
+.word-panel {
+    position: relative;
+    padding: 18px 12px 12px 12px;
+    background: linear-gradient(145deg, #7c3aed, #4c1d95);
+    border: 6px solid #3b0764;
+    border-radius: 24px;
+    box-shadow: 0 10px 0 #2e1065, 0 15px 25px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.panel-lights {
+    position: absolute;
+    top: -16px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-around;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.bulb {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fde047;
+    border: 2px solid white;
+    box-shadow: 0 0 10px currentColor;
+    animation: blink .7s infinite alternate;
+}
+
+@keyframes blink {
+    to { opacity: .4; transform: scale(.75); }
+}
+
+.wheel-heading {
+    text-align: center;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 4px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+}
+
+.word-stack-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0;
+    flex: 1;
+    justify-content: center;
+}
+
+/* WORD CARDS */
+.word-card {
+    position: relative;
+    width: 100%;
+    height: 64px;
+    background: #475569;
+    border: 3px solid #334155;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 46px;
+    font-weight: 900;
+    color: transparent;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.word-card::after {
+    content: "❓";
+    font-size: 30px;
+    position: absolute;
+}
+
+.word-card .word-text {
+    visibility: hidden;
+}
+
+.word-card .indicator-light {
+    position: absolute;
+    left: 14px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #94a3b8;
+    border: 2px solid #64748b;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.word-card.revealed .word-text,
+.word-card.active-chase .word-text,
+.word-card.selected-winner .word-text {
+    visibility: visible;
+}
+
+.word-card.revealed::after,
+.word-card.active-chase::after,
+.word-card.selected-winner::after {
+    display: none;
+}
+
+.word-card.revealed {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #000000;
+}
+
+.word-card.active-chase {
+    opacity: 1;
+    border-color: #f59e0b;
+    background: #fefce8;
+    color: #000000;
+    transform: scale(1.02);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.7);
+}
+
+.word-card.active-chase .indicator-light {
+    background: #f59e0b;
+    box-shadow: 0 0 10px #f59e0b;
+}
+
+.word-card.selected-winner {
+    opacity: 1;
+    border-color: var(--pink);
+    background: #fdf4ff;
+    color: #000000;
+    transform: scale(1.03);
+    box-shadow: 0 0 22px rgba(236, 72, 153, 0.7);
+    z-index: 10;
+}
+
+.word-card.selected-winner .indicator-light {
+    background: var(--pink);
+    box-shadow: 0 0 12px var(--pink);
+}
+
+.word-card.used {
+    opacity: 0.25;
+    background: #cbd5e1 !important;
+    border-color: #94a3b8 !important;
+    pointer-events: none;
+}
+.word-card.used::after {
+    content: "✔️";
+    font-size: 26px;
+}
+
+/* HIGHLIGHT STYLING FOR TARGET PATTERNS */
+.hl-red { 
+    color: #dc2626 !important; 
+}
+
+.word-panel-bottom-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.square-icon-btn {
+    flex: 1;
+    height: 64px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    color: white;
+    font-size: 28px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px #be123c, 0 6px 10px rgba(225,29,72,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+}
+.square-icon-btn:active { transform: translateY(2px); box-shadow: 0 2px #be123c; }
+
+.square-icon-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#openStudentModalBtn {
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+    box-shadow: 0 4px #3b0764, 0 6px 10px rgba(109,40,217,0.3);
+}
+#openStudentModalBtn:active { box-shadow: 0 2px #3b0764; }
+
+#openScratchModalBtn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 4px #b45309, 0 6px 10px rgba(245,158,11,0.3);
+}
+#openScratchModalBtn:active { box-shadow: 0 2px #b45309; }
+
+/* CLAW MACHINE WRAPPER */
+.machine-container {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 0;
+    height: 100%;
+    position: relative;
+}
+
+.machine {
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+    position: relative;
+    padding: 14px;
+    border: 6px solid #3b0764;
+    border-radius: 24px;
+    background: linear-gradient(145deg,#06b6d4,#8b5cf6);
+    box-shadow: 0 10px 0 #2e1065, 0 15px 25px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.machine-lights {
+    position: absolute;
+    top: -16px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-around;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.machine-top {
+    min-height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    border: 3px solid #831843;
+    background: #ec4899;
+    color: white;
+    font-size: clamp(20px, 2.5vw, 36px);
+    font-weight: 900;
+    margin-bottom: 6px;
+    padding: 3px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.glass {
+    flex: 1;
+    min-height: 240px;
+    position: relative;
+    overflow: hidden;
+    border: 5px solid #334155;
+    border-radius: 14px;
+    background: 
+        linear-gradient(rgba(15, 23, 42, 0.45), rgba(2, 6, 23, 0.55)),
+        url("https://png.pngitem.com/pimgs/s/333-3337513_thumb-image-line-friends-characters-png-transparent-png.png") 
+        center / cover repeat;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+}
+
+.floor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background: repeating-linear-gradient(45deg,#facc15 0 12px,#eab308 12px 24px);
+    border-top: 3px solid #ca8a04;
+    z-index: 4;
+}
+
+.claw-rail {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    height: 10px;
+    background: #64748b;
+    border-radius: 5px;
+    z-index: 12;
+}
+
+.claw-assembly {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    width: 52px;
+    height: 120px;
+    transform: translateX(-50%);
+    z-index: 150;
+    transition: left 0.8s ease;
+}
+
+.claw-string {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(to right,#06b6d4,#67e8f9,#06b6d4);
+    transition: height .75s ease;
+}
+
+.claw-head {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    width: 52px;
+    height: 42px;
+    transition: top .75s ease;
+}
+
+.claw-center {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 16px;
+    height: 22px;
+    transform: translateX(-50%);
+    background: #ec4899;
+    border: 2px solid #831843;
+    border-radius: 4px;
+}
+
+.finger {
+    position: absolute;
+    top: 18px;
+    width: 10px;
+    height: 26px;
+    background: #ec4899;
+    border: 2px solid #831843;
+    border-radius: 3px;
+    transform-origin: top center;
+    transition: transform .3s;
+}
+
+.finger.left { left: 5px; transform: rotate(28deg); }
+.finger.right { right: 5px; transform: rotate(-28deg); }
+
+.grabbing .finger.left { transform: rotate(4deg); }
+.grabbing .finger.right { transform: rotate(-4deg); }
+
+.claw-grabbed-toy {
+    position: absolute;
+    bottom: -55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    display: none;
+    z-index: 200;
+    pointer-events: none;
+}
+.claw-grabbed-toy img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.toy {
+    position: absolute;
+    width: 14%;
+    min-width: 60px;
+    height: 110px;
+    bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    background: radial-gradient(circle, #ffffff 70%, #e0f2fe 100%);
+    border: 3px solid #38bdf8;
+    border-radius: 14px;
+    z-index: 5;
+    transition: left .5s, top .5s, opacity 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+.toy img { width: 100%; height: 100%; object-fit: contain; }
+
+.toy.targeted {
+    border-color: #facc15;
+    transform: scale(1.06);
+    background: radial-gradient(circle, #fefce8 60%, #fef08a 100%);
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.9), 0 6px 14px rgba(0,0,0,0.4);
+}
+
+.bike        { left: 3%; }
+.fries       { left: 17%; }
+.kite        { left: 31%; }
+.right-prize { left: 45%; }
+.night       { left: 59%; }
+.pie         { left: 73%; }
+.tie         { left: 87%; }
+
+.controls { display: flex; gap: 8px; margin-top: 8px; }
+
+.control {
+    flex: 1;
+    min-height: 42px;
+    padding: 3px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #22d3ee, #06b6d4);
+    border: 3px solid #0891b2;
+    color: #082f49;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px #0e7490;
+    transition: transform 0.1s ease;
+}
+.control:active { transform: translateY(2px); box-shadow: 0 2px #0e7490; }
+
+/* TRANSPARENT SIDE CLAIM BIN */
+.side-claim-bin {
+    flex: 0 0 110px;
+    height: 100%;
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    background: rgba(190, 18, 60, 0.35);
+    backdrop-filter: blur(2px);
+    border: 6px solid #831843;
+    border-radius: 24px;
+    box-shadow: 0 10px 0 #500724, 0 15px 25px rgba(0,0,0,0.3);
+}
+
+.claim-lights-vertical {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    right: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    z-index: 25;
+    pointer-events: none;
+}
+
+.claim-bulb {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #fde047;
+    border: 1.5px solid white;
+    box-shadow: 0 0 8px currentColor;
+    animation: claimBlink 0.5s infinite alternate;
+}
+
+.claim-bulb:nth-child(even) {
+    animation-delay: 0.25s;
+    background: #38bdf8;
+}
+
+@keyframes claimBlink {
+    to { opacity: 0.3; transform: scale(0.7); }
+}
+
+.side-bin-label {
+    color: #fef08a;
+    font-size: 13px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+}
+
+.side-bin-chute {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    border: 3px solid rgba(251, 207, 232, 0.6);
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.25);
+    box-shadow: inset 0 0 14px rgba(0,0,0,0.3);
+}
+
+.claim-prize {
+    position: absolute;
+    left: 50%;
+    top: -65px;
+    width: 72px;
+    height: 72px;
+    transform: translateX(-50%);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.claim-prize img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; 
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); 
+}
+
+.claim-prize.dropping { animation: prizeDrop 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+@keyframes prizeDrop {
+    0% { top: -65px; opacity: 1; transform: translateX(-50%) scale(0.6); }
+    60% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+    100% { top: calc(100% - 80px); opacity: 1; transform: translateX(-50%) scale(0.9); }
+}
+
+/* MODALS */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 5000;
+}
+
+.modal-overlay.show {
+    display: flex;
+    animation: fadeIn .25s ease;
+}
+
+.modal-content {
+    width: min(540px, 100%);
+    padding: 24px;
+    background: #ffffff;
+    border: 6px solid #8b5cf6;
+    border-radius: 28px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.student-display {
+    font-size: 110px;
+    font-weight: 900;
+    color: #7c3aed;
+    margin: 15px 0;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ff;
+    border-radius: 20px;
+    border: 5px dashed #c4b5fd;
+    text-shadow: 2px 2px 4px rgba(124, 58, 237, 0.2);
+    transition: transform 0.15s ease;
+    cursor: pointer;
+}
+
+.student-display.winner-pop {
+    transform: scale(1.12);
+    color: #ec4899;
+    border-color: #ec4899;
+    background: #fdf4ff;
+}
+
+.selected-numbers {
+    padding: 10px;
+    margin-top: 10px;
+    background: #eff6ff;
+    border: 3px solid #bfdbfe;
+    border-radius: 12px;
+    font-weight: bold;
+    text-align: left;
+    color: #1e40af;
+}
+
+.selected-number-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+    max-height: 70px;
+    overflow-y: auto;
+}
+
+.number-chip {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #3b82f6;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.menu-btn {
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px #3b0764;
+}
+
+.review-modal-content {
+    width: min(680px, 100%);
+    padding: 35px;
+    background: #ffffff;
+    border: 8px solid #ec4899;
+    border-radius: 32px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    text-align: center;
+}
+
+.review-word-box {
+    font-size: 75px;
+    font-weight: 900;
+    color: #000;
+    margin: 15px 0;
+    padding: 16px;
+    background: #fdf4ff;
+    border: 5px dashed #f472b6;
+    border-radius: 22px;
+}
+
+.review-image-box {
+    width: 260px;
+    height: 260px;
+    margin: 18px auto;
+    padding: 15px;
+    background: #f0fdf4;
+    border: 5px solid #4ade80;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.review-image-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.review-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 22px;
+}
+
+.review-btn {
+    flex: 1;
+    padding: 16px;
+    border: 0;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 5px rgba(0,0,0,0.25);
+    transition: transform 0.1s;
+}
+.review-btn:active { transform: translateY(2px); }
+
+.scratch-modal {
+    width: min(960px, 100%);
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 28px;
+    background: linear-gradient(135deg, #fef08a, #fde047), url("https://tse1.mm.bing.net/th/id/OIP.KBI-ob1atP4pUmy3lQSksAHaE7?r=0&rs=1&pid=ImgDetMain&o=7&rm=3") center / cover;
+    border: 8px solid #d97706;
+    border-radius: 32px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+}
+
+.scratch-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.scratch-number {
+    position: relative;
+    height: 95px;
+    border: 4px solid #b45309;
+    border-radius: 16px;
+    background: #fffbeb;
+    overflow: hidden;
+    user-select: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.scratch-number .number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 42px;
+    font-weight: 900;
+    color: #92400e;
+    z-index: 1;
+}
+
+.scratch-canvas {
+    position: absolute;
+    inset: 0;
+    cursor: crosshair;
+    touch-action: none;
+    z-index: 2;
+}
+
+.close-btn {
+    margin-top: 18px;
+    padding: 12px 28px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px #047857;
+}
+
+/* HOW TO PLAY MODAL */
+.how-to-play-list {
+    text-align: left;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #334155;
+    margin: 20px 0;
+}
+.how-to-play-list li {
+    margin-bottom: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SLIDE 1: INTRO / TITLE SCREEN -->
+<div id="slide1" class="slide active">
+    <div class="title-container">
+        <!-- BIGGER PURPLE BOX CONTAINS TITLE -->
+        <div class="title-card">
+            <div class="title-lights">
+                <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+                <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+            </div>
+            <h1 class="main-title">🕹️ Word Claw Challenge 🕹️</h1>
+        </div>
+
+        <!-- BUTTONS OUTSIDE THE PURPLE BOX -->
+        <div class="button-group">
+            <button id="howToPlayBtn" class="title-btn btn-how">❓ How to Play</button>
+            <button id="startGameBtn" class="title-btn btn-start">🚀 Start Game</button>
+        </div>
+    </div>
+
+    <!-- TEACHERS FOOTER -->
+    <div class="footer-credits">
+        <div class="footer-heading">Teacher Christine & Ms. Li</div>
+        <div class="footer-names">English Teachers</div>
+    </div>
+</div>
+
+<!-- SLIDE 2: THE MAIN GAME -->
+<div id="slide2" class="slide">
+    <div class="game">
+        <div class="game-layout">
+
+            <!-- WORD LIGHTS PANEL -->
+            <section class="word-panel">
+                <div class="panel-lights">
+                    <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+                    <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+                </div>
+
+                <h2 class="wheel-heading">/aɪ/ words</h2>
+
+                <!-- VERTICAL WORD BOX STACK CONTAINER -->
+                <div id="wordStackContainer" class="word-stack-container"></div>
+
+                <!-- BOTTOM BUTTONS -->
+                <div class="word-panel-bottom-row">
+                    <button id="startButton" class="square-icon-btn" title="Start Chaser">💡</button>
+                    <button id="openStudentModalBtn" class="square-icon-btn" title="Student Picker">🧒</button>
+                    <button id="openScratchModalBtn" class="square-icon-btn" title="Scratch Card">🎟️</button>
+                </div>
+            </section>
+
+            <!-- CLAW MACHINE WRAPPER -->
+            <div class="machine-container">
+                <section class="machine">
+                    <div class="machine-lights">
+                        <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+                        <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+                    </div>
+
+                    <div class="machine-top">⭐ 娃娃機 Ping-He Claw Machine ⭐</div>
+
+                    <div id="glass" class="glass">
+                        <div class="claw-rail"></div>
+                        <div id="clawAssembly" class="claw-assembly">
+                            <div id="clawString" class="claw-string"></div>
+                            <div id="clawHead" class="claw-head">
+                                <div class="claw-center"></div>
+                                <div class="finger left"></div>
+                                <div class="finger right"></div>
+                                <!-- ATTACHED PRIZE GOES UP WITH CLAW -->
+                                <div id="clawGrabbedToy" class="claw-grabbed-toy">
+                                    <img id="clawGrabbedImg" src="" alt="Grabbed Prize">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="toy bike" data-word="bike"><img src="https://www.pngarts.com/files/4/Bicycle-PNG-Image-Transparent-Background.png" alt="Bike"></div>
+                        <div class="toy fries" data-word="fries"><img src="https://static.vecteezy.com/system/resources/thumbnails/047/312/194/small_2x/french-fries-snack-png.png" alt="Fries"></div>
+                        <div class="toy kite" data-word="kite"><img src="https://png.pngtree.com/png-clipart/20221028/original/pngtree-pipa-fundo-transparente-or-colorful-kite-illustration-png-image_8741194.png" alt="Kite"></div>
+                        <div class="toy right-prize" data-word="right"><img src="https://thumbs.dreamstime.com/b/man-pointing-right-person-arm-outstretched-index-finger-to-334058454.jpg" alt="Right"></div>
+                        <div class="toy night" data-word="night"><img src="https://tse4.mm.bing.net/th/id/OIP.zR3BZ1--HnY7As6q8-lyKwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Night"></div>
+                        <div class="toy pie" data-word="pie"><img src="https://static.vecteezy.com/system/resources/previews/021/027/227/non_2x/apple-pie-transparent-png.png" alt="Pie"></div>
+                        <div class="toy tie" data-word="tie"><img src="https://static.vecteezy.com/system/resources/thumbnails/045/800/708/small_2x/fathers-necktie-3d-object-free-png.png" alt="Tie"></div>
+                        <div class="floor"></div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="leftButton" class="control">⬅ LEFT</button>
+                        <button id="grabButton" class="control">⬇ GRAB</button>
+                        <button id="rightButton" class="control">RIGHT ➡</button>
+                    </div>
+                </section>
+
+                <!-- TRANSPARENT SIDE CLAIM BIN -->
+                <div class="side-claim-bin">
+                    <div class="claim-lights-vertical">
+                        <span class="claim-bulb"></span>
+                        <span class="claim-bulb"></span>
+                        <span class="claim-bulb"></span>
+                        <span class="claim-bulb"></span>
+                        <span class="claim-bulb"></span>
+                    </div>
+                    <div class="side-bin-label">CLAIM</div>
+                    <div class="side-bin-chute">
+                        <div class="claim-prize" id="claimPrize">
+                            <img id="claimPrizeImage" src="" alt="Prize">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- HOW TO PLAY MODAL -->
+<div id="howToPlayModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="wheel-heading" style="color:#7c3aed;">📖 How to Play</h2>
+        <ol class="how-to-play-list">
+            <li>Look at the word</li>
+            <li>Find the item inside</li>
+            <li>Move the claw with LEFT / RIGHT.</li>
+            <li>Press GRAB to catch it!</li>
+            <li>Scratch to win a prize!</li>
+        </ol>
+        <button id="closeHowToPlay" class="close-btn" style="width:100%;">Got it!</button>
+    </div>
+</div>
+
+<!-- STUDENT MODAL -->
+<div id="studentModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="wheel-heading" style="color:#ec4899;">STUDENT</h2>
+        <div id="studentDisplay" class="student-display" title="Click to Roll Again">?</div>
+        <div class="selected-numbers" style="margin-top: 14px;">
+            Students Called:
+            <div id="selectedStudentList" class="selected-number-list"></div>
+            <div id="remainingStudents" style="margin-top: 4px; font-size: 12px;"></div>
+        </div>
+        <button id="resetStudents" class="menu-btn" style="width:100%; margin-top:10px;">🔄 RESET STUDENTS</button>
+        <button id="closeStudentModal" class="close-btn" style="width:100%; margin-top:8px;">CLOSE</button>
+    </div>
+</div>
+
+<!-- MINI REVIEW POPUP MODAL -->
+<div id="reviewModal" class="modal-overlay">
+    <div class="review-modal-content">
+        <h2 class="wheel-heading" style="color:#ec4899; font-size: 34px;">✨ WORD REVIEW ✨</h2>
+        <div id="reviewWordDisplay" class="review-word-box"></div>
+        <div class="review-image-box">
+            <img id="reviewImageDisplay" src="" alt="Review Prize">
+        </div>
+
+        <div class="review-actions">
+            <button id="reviewScratchBtn" class="review-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 5px #b45309;">🎟️ SCRATCH CARD</button>
+            <button id="closeReviewModal" class="review-btn" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 5px #047857;">NEXT ROUND 🚀</button>
+        </div>
+    </div>
+</div>
+
+<!-- BETTER LUCK NEXT TIME MODAL -->
+<div id="betterLuckModal" class="modal-overlay">
+    <div class="review-modal-content" style="border-color: #f59e0b;">
+        <h2 class="wheel-heading" style="color: #d97706; font-size: 32px;">🍀 BETTER LUCK NEXT TIME! 🍀</h2>
+        <p style="font-size: 20px; font-weight: bold; color: #78350f; margin: 18px 0;">Oops! That wasn't the target word.</p>
+        <button id="closeBetterLuckModal" class="review-btn" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 5px #b45309;">NEXT ROUND 🚀</button>
+    </div>
+</div>
+
+<!-- SCRATCH CARD MODAL -->
+<div id="scratchOverlay" class="modal-overlay">
+    <div class="scratch-modal">
+        <h2 class="wheel-heading" style="color:#b45309; font-size:32px;">🎟️ SCRATCH CARD (1 to 20) 🎟️</h2>
+        <div id="scratchGrid" class="scratch-grid"></div>
+        <button id="closeCard" class="close-btn" style="display:block; margin:16px auto 0;">CLOSE CARD</button>
+    </div>
+</div>
+
+<script>
+/* AUDIO SYNTHESIS */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+    try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+
+const wordsPool = ["bike", "fries", "kite", "right", "night", "pie", "tie"];
+let currentWord = "";
+let lightRunning = false;
+let roundWon = false;
+let clawIndex = 3;
+const totalToys = 7;
+
+// Persistent Scratch Card Data
+let scratchDataInitialized = false;
+const scratchState = [];
+
+// Dynamic Pattern Highlighting Function for ie, i_e, and igh
+function highlightPattern(word) {
+    // igh pattern (right, night)
+    if (word.includes("igh")) {
+        return word.replace("igh", '<span class="hl-red">igh</span>');
+    } 
+    // ie pattern (fries, pie, tie)
+    else if (word.includes("ie")) {
+        return word.replace("ie", '<span class="hl-red">ie</span>');
+    } 
+    // i_e split vowel team pattern (bike, kite)
+    else if (word.startsWith("i", 1) && word.endsWith("e")) {
+        const firstLetter = word[0];
+        const middleConsonant = word.slice(2, -1);
+        return `${firstLetter}<span class="hl-red">i</span>${middleConsonant}<span class="hl-red">e</span>`;
+    }
+    return word;
+}
+
+// Build Word Stack UI
+const wordStackContainer = document.getElementById("wordStackContainer");
+wordsPool.forEach(w => {
+    const card = document.createElement("div");
+    card.className = "word-card";
+    card.dataset.word = w;
+    card.innerHTML = `<span class="indicator-light"></span><span class="word-text">${highlightPattern(w)}</span>`;
+    wordStackContainer.appendChild(card);
+});
+
+// Navigation & Modals
+document.getElementById("startGameBtn").onclick = () => {
+    document.getElementById("slide1").classList.remove("active");
+    document.getElementById("slide2").classList.add("active");
+    updateClawPosition();
+};
+
+document.getElementById("howToPlayBtn").onclick = () => document.getElementById("howToPlayModal").classList.add("show");
+document.getElementById("closeHowToPlay").onclick = () => document.getElementById("howToPlayModal").classList.remove("show");
+
+// Chaser Light Start
+document.getElementById("startButton").onclick = () => {
+    if (lightRunning) return;
+    
+    const activeCards = Array.from(document.querySelectorAll(".word-card")).filter(c => !c.classList.contains("used"));
+    if (activeCards.length === 0) {
+        return;
+    }
+
+    lightRunning = true;
+    roundWon = false;
+    document.getElementById("startButton").disabled = true;
+
+    const cards = document.querySelectorAll(".word-card");
+    cards.forEach(c => {
+        if (!c.classList.contains("used")) {
+            c.classList.remove("selected-winner", "active-chase", "revealed");
+        }
+    });
+
+    let steps = Math.floor(Math.random() * 10) + 15;
+    let speed = 60;
+    
+    let activeIndices = [];
+    cards.forEach((c, i) => { if (!c.classList.contains("used")) activeIndices.push(i); });
+    let currentActivePos = Math.floor(Math.random() * activeIndices.length);
+    let currentIndex = activeIndices[currentActivePos];
+
+    function stepChaser() {
+        cards.forEach(c => { if (!c.classList.contains("used")) c.classList.remove("active-chase"); });
+        cards[currentIndex].classList.add("active-chase");
+        playBeep(600, 'sine', 0.05);
+
+        currentActivePos = (currentActivePos + 1) % activeIndices.length;
+        currentIndex = activeIndices[currentActivePos];
+        steps--;
+
+        if (steps > 0) {
+            speed += 10;
+            setTimeout(stepChaser, speed);
+        } else {
+            const prevPos = (currentActivePos - 1 + activeIndices.length) % activeIndices.length;
+            const winnerCard = cards[activeIndices[prevPos]];
+            
+            cards.forEach(c => { if (!c.classList.contains("used")) c.classList.remove("active-chase"); });
+            winnerCard.classList.add("selected-winner");
+            currentWord = winnerCard.dataset.word;
+            lightRunning = false;
+            document.getElementById("startButton").disabled = false;
+            playBeep(900, 'triangle', 0.2);
+        }
+    }
+    stepChaser();
+};
+
+// Claw Machine Movement
+function updateClawPosition() {
+    const assembly = document.getElementById("clawAssembly");
+    const leftPercent = 6 + (clawIndex * 13.5);
+    assembly.style.left = leftPercent + "%";
+
+    document.querySelectorAll(".toy").forEach((t, idx) => {
+        if (idx === clawIndex && t.style.opacity !== "0") {
+            t.classList.add("targeted");
+        } else {
+            t.classList.remove("targeted");
+        }
+    });
+}
+
+document.getElementById("leftButton").onclick = () => {
+    if (clawIndex > 0) {
+        clawIndex--;
+        updateClawPosition();
+        playBeep(400, 'sine', 0.04);
+    }
+};
+
+document.getElementById("rightButton").onclick = () => {
+    if (clawIndex < totalToys - 1) {
+        clawIndex++;
+        updateClawPosition();
+        playBeep(400, 'sine', 0.04);
+    }
+};
+
+// Grab Action with Permanent Item Removal & Claim Drop Animation
+document.getElementById("grabButton").onclick = () => {
+    if (!currentWord) {
+        return;
+    }
+
+    const toys = document.querySelectorAll(".toy");
+    const targetToy = toys[clawIndex];
+    
+    if (targetToy.style.opacity === "0") {
+        return;
+    }
+
+    const toyWord = targetToy.dataset.word;
+    const assembly = document.getElementById("clawAssembly");
+    const stringEl = document.getElementById("clawString");
+    const headEl = document.getElementById("clawHead");
+    const grabbedToy = document.getElementById("clawGrabbedToy");
+    const grabbedImg = document.getElementById("clawGrabbedImg");
+
+    document.getElementById("leftButton").disabled = true;
+    document.getElementById("rightButton").disabled = true;
+    document.getElementById("grabButton").disabled = true;
+
+    stringEl.style.height = "90px";
+    headEl.style.top = "90px";
+    assembly.classList.add("grabbing");
+    playBeep(300, 'sawtooth', 0.3);
+
+    setTimeout(() => {
+        const imgsrc = targetToy.querySelector("img").src;
+        grabbedImg.src = imgsrc;
+        grabbedToy.style.display = "block";
+        targetToy.style.opacity = "0";
+
+        setTimeout(() => {
+            stringEl.style.height = "24px";
+            headEl.style.top = "24px";
+            playBeep(500, 'sawtooth', 0.3);
+
+            setTimeout(() => {
+                // Move assembly over to the side claim bin position
+                assembly.style.left = "132%";
+
+                setTimeout(() => {
+                    if (toyWord === currentWord) {
+                        roundWon = true;
+                        document.querySelectorAll(".word-card").forEach(c => {
+                            if (c.dataset.word === currentWord) {
+                                c.classList.add("used");
+                                c.classList.remove("selected-winner");
+                            }
+                        });
+
+                        // Extend claw down inside the claim box
+                        stringEl.style.height = "130px";
+                        headEl.style.top = "130px";
+                        playBeep(350, 'sine', 0.25);
+
+                        setTimeout(() => {
+                            // Open fingers / drop prize inside claim box
+                            assembly.classList.remove("grabbing");
+                            grabbedToy.style.display = "none";
+                            triggerClaim(imgsrc);
+                            playBeep(650, 'triangle', 0.2);
+
+                            setTimeout(() => {
+                                // Retract claw up from claim box
+                                stringEl.style.height = "24px";
+                                headEl.style.top = "24px";
+
+                                setTimeout(() => {
+                                    showReviewModal(currentWord, imgsrc);
+                                }, 600);
+
+                            }, 600);
+
+                        }, 700);
+
+                    } else {
+                        grabbedToy.style.display = "none";
+                        targetToy.style.opacity = "1";
+                        showBetterLuckModal();
+                    }
+
+                    document.getElementById("leftButton").disabled = false;
+                    document.getElementById("rightButton").disabled = false;
+                    document.getElementById("grabButton").disabled = false;
+                    
+                    setTimeout(() => {
+                        clawIndex = 3;
+                        updateClawPosition();
+                    }, 500);
+
+                }, 900);
+            }, 800);
+        }, 800);
+    }, 800);
+};
+
+function triggerClaim(imgsrc) {
+    const claimPrize = document.getElementById("claimPrize");
+    const claimImg = document.getElementById("claimPrizeImage");
+    claimImg.src = imgsrc;
+    claimPrize.classList.remove("dropping");
+    void claimPrize.offsetWidth;
+    claimPrize.classList.add("dropping");
+}
+
+function clearClaimBin() {
+    const claimPrize = document.getElementById("claimPrize");
+    const claimImg = document.getElementById("claimPrizeImage");
+    claimPrize.classList.remove("dropping");
+    claimImg.src = "";
+}
+
+function showReviewModal(word, imgsrc) {
+    document.getElementById("reviewWordDisplay").innerHTML = highlightPattern(word);
+    document.getElementById("reviewImageDisplay").src = imgsrc;
+    document.getElementById("reviewModal").classList.add("show");
+}
+
+function showBetterLuckModal() {
+    document.getElementById("betterLuckModal").classList.add("show");
+}
+
+document.getElementById("closeReviewModal").onclick = () => {
+    document.getElementById("reviewModal").classList.remove("show");
+    resetRound();
+};
+
+document.getElementById("reviewScratchBtn").onclick = () => {
+    document.getElementById("reviewModal").classList.remove("show");
+    document.getElementById("scratchOverlay").classList.add("show");
+    initScratchCard();
+};
+
+document.getElementById("closeBetterLuckModal").onclick = () => {
+    document.getElementById("betterLuckModal").classList.remove("show");
+    resetRound();
+};
+
+function resetRound() {
+    currentWord = "";
+    document.querySelectorAll(".word-card").forEach(c => {
+        if (!c.classList.contains("used")) {
+            c.classList.remove("selected-winner", "active-chase", "revealed");
+        }
+    });
+    clearClaimBin();
+    clawIndex = 3;
+    updateClawPosition();
+}
+
+/* STUDENT PICKER (1-25 with AUTOMATIC 3-second roll on opening) */
+const totalStudents = 25;
+let remainingStudents = Array.from({length: totalStudents}, (_, i) => i + 1);
+let calledStudents = [];
+let isRollingStudent = false;
+
+document.getElementById("openStudentModalBtn").onclick = () => {
+    document.getElementById("studentModal").classList.add("show");
+    updateStudentDisplay();
+    rollStudentNumber();
+};
+
+document.getElementById("closeStudentModal").onclick = () => document.getElementById("studentModal").classList.remove("show");
+
+document.getElementById("studentDisplay").onclick = rollStudentNumber;
+
+function rollStudentNumber() {
+    if (isRollingStudent || remainingStudents.length === 0) return;
+    isRollingStudent = true;
+
+    const display = document.getElementById("studentDisplay");
+    const startTime = Date.now();
+    const duration = 3000;
+
+    const scrambleInterval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime < duration) {
+            const randomTemp = Math.floor(Math.random() * totalStudents) + 1;
+            display.innerText = randomTemp;
+            playBeep(500 + Math.random() * 300, 'sine', 0.04);
+        } else {
+            clearInterval(scrambleInterval);
+            const randomIndex = Math.floor(Math.random() * remainingStudents.length);
+            const chosen = remainingStudents.splice(randomIndex, 1)[0];
+            calledStudents.push(chosen);
+
+            display.innerText = chosen;
+            display.classList.add("winner-pop");
+            playBeep(900, 'triangle', 0.25);
+            
+            setTimeout(() => display.classList.remove("winner-pop"), 400);
+            updateStudentDisplay();
+            isRollingStudent = false;
+        }
+    }, 60);
+}
+
+function updateStudentDisplay() {
+    const listEl = document.getElementById("selectedStudentList");
+    listEl.innerHTML = "";
+    calledStudents.forEach(s => {
+        const chip = document.createElement("div");
+        chip.className = "number-chip";
+        chip.innerText = s;
+        listEl.appendChild(chip);
+    });
+    document.getElementById("remainingStudents").innerText = `Remaining: ${remainingStudents.length} / 25`;
+}
+
+document.getElementById("resetStudents").onclick = () => {
+    remainingStudents = Array.from({length: totalStudents}, (_, i) => i + 1);
+    calledStudents = [];
+    document.getElementById("studentDisplay").innerText = "?";
+    updateStudentDisplay();
+};
+
+/* SCRATCH CARD MODAL (1 to 20 fixed numbers with permanent scratch visibility) */
+document.getElementById("openScratchModalBtn").onclick = () => {
+    document.getElementById("scratchOverlay").classList.add("show");
+    initScratchCard();
+};
+document.getElementById("closeCard").onclick = () => {
+    document.getElementById("scratchOverlay").classList.remove("show");
+    resetRound();
+};
+
+function initScratchCard() {
+    const grid = document.getElementById("scratchGrid");
+    
+    if (!scratchDataInitialized) {
+        const numbers = Array.from({length: 20}, (_, i) => i + 1);
+        for (let i = numbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+        }
+        numbers.forEach((num) => {
+            scratchState.push({ num: num, paths: [] });
+        });
+        scratchDataInitialized = true;
+    }
+
+    grid.innerHTML = "";
+    scratchState.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "scratch-number";
+        card.innerHTML = `
+            <div class="number">${item.num}</div>
+            <canvas class="scratch-canvas" width="160" height="95" data-index="${index}"></canvas>
+        `;
+        grid.appendChild(card);
+
+        const canvas = card.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#64748b";
+        ctx.font = "bold 16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("SCRATCH", canvas.width / 2, canvas.height / 2 + 6);
+
+        if (item.paths && item.paths.length > 0) {
+            ctx.globalCompositeOperation = "destination-out";
+            item.paths.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        let isDrawing = false;
+        function scratch(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            item.paths.push({ x, y });
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        canvas.onmousedown = (e) => { isDrawing = true; scratch(e); };
+        canvas.onmousemove = scratch;
+        window.onmouseup = () => isDrawing = false;
+
+        canvas.ontouchstart = (e) => { isDrawing = true; scratch(e); };
+        canvas.ontouchmove = scratch;
+        canvas.ontouchend = () => isDrawing = false;
+    });
+}
+</script>
+
+</body>
+</html>
